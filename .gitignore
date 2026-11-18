@@ -1,0 +1,21 @@
+# Papers and working directories from trying the skill inside this repo.
+# Source PDFs are usually copyrighted — never commit them by accident.
+*.pdf
+work/
+
+# Editor / IDE
+.history/
+.idea/
+.vscode/
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code project-scope install artifacts (machine-specific absolute paths)
+.claude/

@@ -1,0 +1,22 @@
+{
+  "name": "paper-guide",
+  "version": "1.0.0",
+  "description": "Turn an English research paper into a complete offline Chinese reading guide: one self-contained HTML with page-aligned Chinese translation, flowing English source text, the original PDF and figures, an interactive research roadmap, and page-level Chinese AI notes.",
+  "author": {
+    "name": "LeanderLXZ",
+    "email": "leander.lxz@gmail.com"
+  },
+  "homepage": "https://github.com/LeanderLXZ/paper-guide",
+  "repository": "https://github.com/LeanderLXZ/paper-guide.git",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "paper-reading",
+    "research-paper",
+    "translation",
+    "chinese",
+    "pdf",
+    "offline-html"
+  ]
+}

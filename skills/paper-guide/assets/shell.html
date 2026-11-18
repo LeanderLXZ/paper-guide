@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html data-view="reader" lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>__PG_TITLE_ZH__</title><style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#e5e5e5;color:#29352f}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}.reader{height:100vh;height:100dvh;display:flex;flex-direction:column}.tabs-bar{flex:none;display:flex;justify-content:center;align-items:center;min-height:58px;background:#fcfcfa;border-bottom:1px solid #d6ddd7;padding:7px 14px;box-shadow:0 1px 4px #00000007;z-index:5}.tabs{display:flex;align-items:center;padding:3px;gap:3px;background:#eef1ed;border:1px solid #dde3dc;border-radius:9px}.tab{font-family:inherit;font-size:13px;line-height:1.5;font-weight:500;cursor:pointer;border:1px solid transparent;border-radius:6px;background:transparent;color:#657269;padding:8px 23px;white-space:nowrap;transition:background .12s,color .12s}.tab:hover{color:#155746}.tab[aria-selected=true]{background:#fff;color:#155746;border-color:#d4dfd6;box-shadow:0 1px 3px #193c2710;font-weight:600}.tab:focus-visible{outline:2px solid #307b62;outline-offset:2px}.reader-content{flex:1;min-height:0;position:relative}.tab-panel{position:absolute;inset:0;background:#e5e5e5}.tab-panel[hidden]{display:block!important;visibility:hidden;pointer-events:none}.tab-panel[hidden] .document-frame{visibility:hidden}.document-frame{width:100%;height:100%;border:0;display:block;background:#e5e5e5}.loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#e5e5e5;color:#657269;font-size:13px;pointer-events:none}.loading[hidden]{display:none}.no-js{position:fixed;inset:58px 0 0;background:#fff;padding:30px;font-size:14px}@media(max-width:520px){.tabs-bar{min-height:54px;padding:5px 10px}.tabs{width:100%;max-width:380px}.tab{flex:1;padding:8px 8px;font-size:12px}}
+/* Only the currently visible document contributes a navigation toolbar. */
+html[data-view=reader] .tabs-bar{display:none}.tabs-bar{min-height:62px;justify-content:flex-start;padding:10px 28px}.tabs{border-radius:8px}.tab{font-size:12px;padding:6px 12px;border-radius:5px}.no-js{inset:0}
+@media(max-width:760px){.tabs-bar{padding:10px 14px;min-height:62px}.tabs{width:auto;max-width:none}.tab{flex:none;font-size:11px;padding:6px 10px}}
+
+
+/* Scale the outer shell once; the embedded reader keeps its own viewport. */
+@media screen{html{zoom:__PG_ZOOM__}.reader{height:100%}}
+</style></head><body><div class="reader"><header class="tabs-bar"><div aria-label="文档查看方式" class="tabs" role="tablist"><button aria-controls="panel-reader" aria-selected="true" class="tab" data-view="reader" id="tab-reader" role="tab" tabindex="0" type="button">论文导读</button><button aria-controls="panel-english" aria-selected="false" class="tab" data-view="english" id="tab-english" role="tab" tabindex="-1" type="button">原文 PDF</button></div></header><main class="reader-content"><section aria-hidden="false" aria-labelledby="tab-reader" class="tab-panel" id="panel-reader" role="tabpanel"><iframe class="document-frame" id="reader-document" srcdoc="__PG_READER_SRCDOC__" title="论文导读（地图、正文与 AI 解读）"></iframe></section><section aria-hidden="true" aria-labelledby="tab-english" class="tab-panel" hidden="" id="panel-english" inert="" role="tabpanel"><iframe class="document-frame" id="english-document" title="英文原文 PDF"></iframe><div class="loading" id="english-loading" role="status">正在加载英文原文 PDF…</div></section></main></div><noscript><div class="no-js">请启用 JavaScript，以在英文原文 PDF 与中文译文之间切换。</div></noscript><script id="paper-guide-metadata" type="application/json">__PG_METADATA__</script><script id="paper-guide-manifest" type="application/json">__PG_MANIFEST__</script><script id="original-pdf" type="application/octet-stream">__PG_PDF_BASE64__</script><script>
+(() => {
+ const metadata=JSON.parse(document.getElementById("paper-guide-metadata").textContent);
+ const tabs=[...document.querySelectorAll('[role="tab"]')];
+ const reading=document.getElementById('reader-document');
+ const english=document.getElementById('english-document');
+ const loading=document.getElementById('english-loading');
+ function setInterfaceLanguage(language){
+  const en=language==='en';document.documentElement.lang=en?'en':'zh-CN';
+  const labels=en?{reader:'Reading guide',english:'Original PDF'}:{reader:'论文导读',english:'原文 PDF'};
+  tabs.forEach(tab=>tab.textContent=labels[tab.dataset.view]);
+  document.querySelector('.tabs').setAttribute('aria-label',en?'Document views':'文档查看方式');
+  reading.title=en?'Reading guide: map, paper text and AI notes':'论文导读（地图、正文与 AI 解读）';
+  english.title=en?'Original paper PDF':'英文原文 PDF';
+  loading.textContent=en?'Loading the embedded original PDF…':'正在加载内嵌原文 PDF…';
+  document.title=(en?metadata.title_en:metadata.title_zh)+(en?' · Paper guide':' · 论文导读');
+ }
+ let pdfURL=null,pdfBlob=null;
+ function ensurePDF(requestedPage){
+  if(english.dataset.loaded==='true'&&!requestedPage)return;
+  if(!pdfBlob){
+   const raw=atob(document.getElementById('original-pdf').textContent.trim());
+   const bytes=new Uint8Array(raw.length);
+   for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+   pdfBlob=new Blob([bytes],{type:'application/pdf'});
+  }
+  const previousURL=pdfURL;
+  const nextURL=URL.createObjectURL(pdfBlob);
+  pdfURL=nextURL;
+  loading.hidden=false;
+  english.addEventListener('load',()=>{
+   if(pdfURL===nextURL)loading.hidden=true;
+   if(previousURL)URL.revokeObjectURL(previousURL);
+  },{once:true});
+  english.src=nextURL+(requestedPage?'#page='+requestedPage+'&view=FitH':'#view=FitH');
+  english.dataset.loaded='true';
+ }
+ function activate(view,focus=false,requestedPage=null){
+  if(view==='english')ensurePDF(requestedPage);
+  for(const tab of tabs){
+   const selected=tab.dataset.view===view;
+   tab.setAttribute('aria-selected',String(selected));
+   tab.tabIndex=selected?0:-1;
+   const panel=document.getElementById(tab.getAttribute('aria-controls'));
+   panel.hidden=!selected;
+   panel.inert=!selected;
+   panel.setAttribute('aria-hidden',String(!selected));
+
+  }
+  document.documentElement.dataset.view=view;
+  if(view==='reader'){
+   const shouldFocus=focus||document.activeElement?.closest('.tabs-bar');
+   if(shouldFocus)reading.contentDocument?.querySelector('[data-reader-view="reader"]')?.focus();
+  }else if(focus)tabs.find(tab=>tab.dataset.view===view)?.focus();
+  history.replaceState(null,'','#'+view);
+ }
+ tabs.forEach((tab,index)=>{
+  tab.addEventListener('click',()=>activate(tab.dataset.view,true));
+  tab.addEventListener('keydown',event=>{
+   let next=null;
+   if(event.key==='ArrowRight')next=(index+1)%tabs.length;
+   else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;
+   else if(event.key==='Home')next=0;
+   else if(event.key==='End')next=tabs.length-1;
+   if(next!==null){event.preventDefault();activate(tabs[next].dataset.view,true);}
+  });
+ });
+ window.addEventListener('message',event=>{
+  if(event.source!==reading.contentWindow)return;
+  if(event.data?.type==='paper-reader.interface-language'&&['en','zh-CN'].includes(event.data.language)){
+   setInterfaceLanguage(event.data.language);
+  }else if(event.data?.type==='paper-reader.change-view'&&['reader','english'].includes(event.data.view)){
+   activate(event.data.view,true);
+  }else if(event.data?.type==='paper-reader.open-pdf'){
+   const requestedPage=Math.max(1,Math.min(metadata.page_count,Number(event.data.page)||1));
+   activate('english',true,requestedPage);
+  }
+ });
+ const requested=location.hash.slice(1);
+ activate(['reader','english'].includes(requested)?requested:'reader');
+ window.__bilingualReady=true;
+})();
+</script></body></html>

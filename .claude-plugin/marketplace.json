@@ -1,0 +1,28 @@
+{
+  "name": "paper-guide",
+  "description": "Self-hosted marketplace for the paper-guide plugin.",
+  "owner": {
+    "name": "LeanderLXZ",
+    "email": "leander.lxz@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "paper-guide",
+      "description": "Turn an English research paper into a complete offline Chinese reading guide: page-aligned translation, English source, original PDF and figures, a research roadmap and page-level Chinese AI notes in one HTML file.",
+      "author": {
+        "name": "LeanderLXZ",
+        "email": "leander.lxz@gmail.com"
+      },
+      "category": "productivity",
+      "source": "./",
+      "homepage": "https://github.com/LeanderLXZ/paper-guide",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "paper-reading",
+        "translation",
+        "pdf"
+      ]
+    }
+  ]
+}
